@@ -8,6 +8,11 @@
 #>>> L2 files are global, while L3 files are cropped data (regional).         #
 #                                                                             #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+@author : Reza Rezaei
+email   : rezarezaei2008@gmail.com
+version : 0.7
+year    : 2022
 """
 
 import os
