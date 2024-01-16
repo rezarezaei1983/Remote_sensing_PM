@@ -28,6 +28,11 @@
 #    deactivate the data plotting.                                            #
 #                                                                             #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+@author : Reza Rezaei
+email   : rezarezaei2008@gmail.com
+version : 1.3
+year    : 2022
 """
 
 import os
@@ -266,9 +271,9 @@ class GetMaskedImage():
         
 #####################################  Run  ###################################
 
-ins = GetMaskedImage(data_dir="C:/Users/Reza/Desktop/Deniz_data/Deniz_data_2/",
+ins = GetMaskedImage(data_dir="C:/Users/Reza/Desktop/data/",
                      use_shapefile_subset=False,
-                     shapefile_dir="C:/Users/Reza/Desktop/Deniz_data/shapefile/TUR_adm0.shp",
+                     shapefile_dir="C:/Users/Reza/Desktop/data/shapefile/TUR_adm0.shp",
                      max_nans_percent=100,
                      create_map=True)
 
