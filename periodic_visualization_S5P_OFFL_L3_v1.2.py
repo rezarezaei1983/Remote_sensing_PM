@@ -39,7 +39,7 @@
 
 @author : Reza Rezaei
 email   : rezarezaei2008@gmail.com
-version : 1.1
+version : 1.2
 year    : 2022
 """
 
@@ -90,32 +90,16 @@ class handleS5Pl3():
             sys.exit()
         
         df_dict = {"values": [], "times": [], "lat": None, "lon": None, "NaNs%": []}
-        
         for count, file in enumerate(infiles):
             cur_file = xr.open_dataset(file)
             lats = cur_file["latitude"][:].values
             lons = cur_file["longitude"][:].values
-            
             idx_lat=(lats>=self.lat_bnd[0])*(lats<=self.lat_bnd[1])
             idx_lon=(lons>=self.lon_bnd[0])*(lons<=self.lon_bnd[1])
             idxlat=np.nonzero(idx_lat)[0]
-            idxlon=np.nonzero(idx_lon)[0]
-            
-            """
-            latli = np.argmin(np.abs(lats - self.lat_bnd[0]))
-            latui = np.argmin(np.abs(lats - self.lat_bnd[1])) 
-            print("latli :", latli)
-            print("latui :", latui)
-            
-            lonli = np.argmin( np.abs( lons - self.lon_bnd[0] ) )
-            lonui = np.argmin( np.abs( lons - self.lon_bnd[1] ) )
-            print("lonli :", lonli)
-            print("lonui :", lonui)
-            """
-            
+            idxlon=np.nonzero(idx_lon)[0]             
             s5p_aai = cur_file[self.var][0, idxlat[0]:idxlat[-1], idxlon[0]:idxlon[-1]]
             aai_vals = s5p_aai.values
-            
             total_grids = aai_vals.size
             nans = np.count_nonzero(np.isnan(s5p_aai))
             nan_pernentage = (100 * nans) / total_grids
@@ -167,8 +151,7 @@ class handleS5Pl3():
             print("\nError: Only 'D' (Daily), 'M' (Monthly), 'S' (seasonal), " \
                   "and 'Y' (Yearly) values are acceptable as inputs for the " \
                   "variable named 'period'.")
-            sys.exit() 
-        #pprint.pprint(subset_dict, sort_dicts=False)                  # ******************   
+            sys.exit()  
         
         return subset_dict
     
@@ -207,16 +190,14 @@ class handleS5Pl3():
                         temporal_subset[cur_year]["lat"] = df_dict["lat"]
                         temporal_subset[cur_year]["lon"] = df_dict["lon"]
                         if dt.date() not in temporal_subset[cur_year]["date"]:
-                            temporal_subset[cur_year]["date"].append(dt.date())
-                                                
+                            temporal_subset[cur_year]["date"].append(dt.date())                             
                     elif dt.month in season_dict["Summer"]:
                         cur_date = "Summer"
                         temporal_subset[cur_year]["data"][cur_date].append(df_dict["values"][count])
                         temporal_subset[cur_year]["lat"] = df_dict["lat"]
                         temporal_subset[cur_year]["lon"] = df_dict["lon"]
                         if dt.date() not in temporal_subset[cur_year]["date"]:
-                            temporal_subset[cur_year]["date"].append(dt.date())
-                        
+                            temporal_subset[cur_year]["date"].append(dt.date())     
                     elif dt.month in season_dict["Autumn"]:
                         cur_date = "Autumn"
                         temporal_subset[cur_year]["data"][cur_date].append(df_dict["values"][count])
@@ -224,7 +205,6 @@ class handleS5Pl3():
                         temporal_subset[cur_year]["lon"] = df_dict["lon"]
                         if dt.date() not in temporal_subset[cur_year]["date"]:
                             temporal_subset[cur_year]["date"].append(dt.date())
-                        
                     elif dt.month in season_dict["Winter"]:
                         cur_date = "Winter"
                         if dt.month == 12:
@@ -241,17 +221,11 @@ class handleS5Pl3():
                                 if dt.date() not in temporal_subset[cur_year - 1]["date"]:
                                     temporal_subset[cur_year - 1]["date"].append(dt.date())
 
-        # append number of files in each day, month, or year
         for year in temporal_subset.keys():
             for date in temporal_subset[year]["data"].keys():
                 file_no = len(temporal_subset[year]["data"][date])
                 temporal_subset[year]["file no"].append(file_no)
         
-        #pprint.pprint(temporal_subset[2018], sort_dicts=False)
-        #print("\n\n")
-        #print(len(temporal_subset[2019]["data"][2019]))              
-        #print(len(temporal_subset[2018]["data"]['2018-06-28']))
-        #print(temporal_subset[2018]["date"])
         del df_dict
         return temporal_subset
     
@@ -272,7 +246,6 @@ class handleS5Pl3():
                     for i in range(len(value)):
                         mins.append(min_list[i])
                         maxs.append(max_list[i])
-        
         vmin = math.floor(np.nanmin(np.array(mins)))   
         vmax = math.ceil(np.nanmax(np.array(maxs)))       
 
@@ -287,16 +260,7 @@ class handleS5Pl3():
         for year in periodic_val.keys():
             for date, value in periodic_val[year]["data"].items():
                 if len(value) > 0:
-                    arr = np.array(value)
-                                        
-                    #lat_arr = np.array(periodic_val[year]["lat"])   # <<<<<<<<<<
-                    #lon_arr = np.array(periodic_val[year]["lon"])   # <<<<<<<<<<
-                    #print("\n----------------------")               # <<<<<<<<<<
-                    #print("Data Shape: ", arr.shape)                # <<<<<<<<<<
-                    #print("Lat Shape: ", lat_arr.shape)             # <<<<<<<<<<
-                    #print("Lon Shape: ", lon_arr.shape)             # <<<<<<<<<<
-                    
-                    
+                    arr = np.array(value)                                     
                     if self.measure.casefold() == "mean".casefold():
                         val = np.nanmean(arr, axis=0)    
                         if self.threshold != None:
@@ -311,15 +275,6 @@ class handleS5Pl3():
                             val = np.where(val >= self.threshold, val, vmin)
                     periodic_val[year]["data"][date] = val
         
-        #print(periodic_val[2018]["data"]["2018-06-28"].shape)   # daily
-        #print(periodic_val[2018]["data"]["Jun"])                # monthly
-        #print(periodic_val[2020]["data"][2020])                 # yearly
-        #print(periodic_val[2019]["data"]["Winter"])             # seasonal
-        #print(periodic_val[2018])
-        #print(np.array(periodic_val[2020]["lat"]).shape)
-        #print(np.array(periodic_val[2020]["lon"]).shape)
-        #pprint.pprint(periodic_val, sort_dicts=False)
-        #pprint.pprint(periodic_val[2018], sort_dicts=False)
         return periodic_val
            
     def visualizeOnMap(self, arr, lon, lat, vmin, vmax, measure, period, date, out_dir):      
@@ -328,7 +283,7 @@ class handleS5Pl3():
         ax = plt.axes(projection=projection)
    
         img = plt.pcolormesh(lon, lat, arr, 
-                            cmap=plt.get_cmap("jet"),   # "rainbow"  "PiYG"  "seismic"   "jet"  
+                            cmap=plt.get_cmap("jet"),
                             transform=ccrs.PlateCarree(),
                             vmin=vmin,
                             vmax=vmax,
@@ -336,7 +291,6 @@ class handleS5Pl3():
         
         ax.add_feature(cfeature.BORDERS, edgecolor="black", linewidth=1)
         ax.add_feature(cfeature.COASTLINE, edgecolor="black", linewidth=1)
-        
         ax.set_extent([self.lon_bnd[0], self.lon_bnd[1], self.lat_bnd[0], 
                        self.lat_bnd[1]], ccrs.PlateCarree())
         
@@ -371,7 +325,6 @@ class handleS5Pl3():
         
         measures = {"mean": "Mean", "max": "Maximum", "min": "Minimum"}
         periods = {"d": "Daily", "m": "Monthly", "s": "Seasonal", "y": "Yearly"}
-        
         report = {"Period":[], "Number of used files":[]}
         
         for year in periodic_val.keys():
@@ -402,7 +355,6 @@ class handleS5Pl3():
         df = pd.DataFrame.from_dict(report)
         out_file_name = f"{path}/day_number_of_periods.csv"
         df.to_csv(out_file_name , index=False)
-        
         del periodic_val
         
         print(f"\nPlots directory:\n    {path}\n")
@@ -417,11 +369,9 @@ class handleS5Pl3():
         print(msg)
 
 
-        
 
-    
 #================================== Instance ==================================
-df_dir = "C:/Users/Reza/Desktop/Deniz_data/l3/"               
+df_dir = "C:/Users/Reza/Desktop/data/l3/"               
                  
 ins = handleS5Pl3(input_dir=df_dir,
           lat_bound=[35, 43], 
@@ -429,6 +379,6 @@ ins = handleS5Pl3(input_dir=df_dir,
           max_nans_percent=25,
           period="m",              # options: d (daily), m (monthly), s (seasonal), y (yearly)
           stat_measure="mean",      # options: mean, max, min
-          threshold=None)          # options: None or an integer (for example: 1.5)
+          threshold=None)          # options: None or an integer
 
 ins.runVisualization()
