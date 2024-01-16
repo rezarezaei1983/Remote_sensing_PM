@@ -2,8 +2,9 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #                             <<< SOME NOTES >>>                              #
 #                                                                             #
+#>>> This script separates Sentinel-5P files based on the given maximum Nan   #
+#    percentage ('max_nans_percent').                                         #
 #>>> L2 and L3 files must be in the same directory.                           #
-#                                                                             #
 #>>> L2 files are global, while L3 files are cropped data (regional).         #
 #                                                                             #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -80,8 +81,6 @@ class GetMaskedImage():
         cur_date = cur_date[:4] + "." + cur_date[4:6] + "." + cur_date[6:]
         cur_date = cur_date[:-4] + ":" + cur_date[-4:-2] + ":" + cur_date[-2:]
         cur_date = datetime.strptime(cur_date, '%Y.%m.%d %H:%M:%S')
-        print("\n\n---------------------------\n", file)
-        print(cur_date)
             
         nc = netCDF4.Dataset(file,'r')
         abs_aer_ind = nc.variables[var_name][0,:,:]
@@ -108,7 +107,7 @@ class GetMaskedImage():
         elif nan_pernentage < self.max_nans:
             print("\n>>> Should be used.")
             
-        plt.imshow(mskd_abs_aer_ind, origin='lower')  # , extent =[0, lon_size, 0, lat_size]
+        plt.imshow(mskd_abs_aer_ind, origin='lower')
         plt.title(cur_date)
         plt.show()
             
@@ -122,8 +121,8 @@ class GetMaskedImage():
 
 
 
-#    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%      Run      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ins = GetMaskedImage(data_dir="C:/Users/Reza/Desktop/Deniz_data/Deniz_data_2/",
-                     shapefile_dir="C:/Users/Reza/Desktop/Deniz_data/shapefile/TUR_adm0.shp",
+#    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%      Run      %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ins = GetMaskedImage(data_dir="C:/Users/Reza/Desktop/data/",
+                     shapefile_dir="C:/Users/Reza/Desktop/shapefile/TUR_adm0.shp",
                      max_nans_percent = 15)        
 ins.RunCalculation()
